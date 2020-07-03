@@ -28,13 +28,19 @@ class ImageHandler {
             if (request.outputFormat !== undefined) {  
                 await modifiedImage.toFormat(request.outputFormat);  
             }
-            const bufferImage = await modifiedImage.toBuffer();  
-            return bufferImage.toString('base64'); 
-        } else { 
-            return originalImage.toString('base64'); 
-        } 
-    }  
-  
+            const bufferImage = await modifiedImage.toBuffer();
+            return {
+                body: bufferImage.toString('base64'),
+                contentType: request.originalImageContentType
+            };
+        } else {
+            return {
+                body: bufferImage.toString('base64'),
+                contentType: request.originalImageContentType
+            };
+        }
+    }
+
     /**  
      * Applies image modifications to the original image based on edits  
      * specified in the ImageRequest.  

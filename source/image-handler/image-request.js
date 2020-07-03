@@ -26,7 +26,9 @@ class ImageRequest {
             this.bucket = this.parseImageBucket(event, this.requestType);
             this.key = this.parseImageKey(event, this.requestType);
             this.edits = this.parseImageEdits(event, this.requestType);
-            this.originalImage = await this.getOriginalImage(this.bucket, this.key)
+            const originalImageWithContentType = await this.getOriginalImage(this.bucket, this.key)
+            this.originalImage = originalImageWithContentType.body;
+            this.originalImageContentType = originalImageWithContentType.contentType;
             return Promise.resolve(this);
         } catch (err) {
             return Promise.reject(err);
@@ -46,9 +48,9 @@ class ImageRequest {
         const request = s3.getObject(imageLocation).promise();
         try {
             const originalImage = await request;
-            return Promise.resolve(originalImage.Body);
+            return Promise.resolve({ body: originalImage.Body, contentType: originalImage.ContentType });
         }
-        catch(err) {
+        catch (err) {
             return Promise.reject({
                 status: 500,
                 code: err.code,

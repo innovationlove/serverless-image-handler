@@ -20,12 +20,11 @@ exports.handler = async (event) => {
     const imageHandler = new ImageHandler();
     try {
         const request = await imageRequest.setup(event);
-        console.log(request);
-        const processedRequest = await imageHandler.process(request);
+        const { contentType, body } = await imageHandler.process(request);
         const response = {
             "statusCode": 200,
-            "headers" : getResponseHeaders(),
-            "body": processedRequest,
+            "headers": getResponseHeaders(false, contentType),
+            "body": body,
             "isBase64Encoded": true
         }
         return response;
@@ -33,7 +32,7 @@ exports.handler = async (event) => {
         console.log(err);
         const response = {
             "statusCode": err.status,
-            "headers" : getResponseHeaders(true),
+            "headers": getResponseHeaders(true),
             "body": JSON.stringify(err),
             "isBase64Encoded": false
         }
@@ -46,13 +45,13 @@ exports.handler = async (event) => {
  * or error condition.
  * @param {boolean} isErr - has an error been thrown? 
  */
-const getResponseHeaders = (isErr) => {
+const getResponseHeaders = (isErr, contentType) => {
     const corsEnabled = (process.env.CORS_ENABLED === "Yes");
     const headers = {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Allow-Credentials": true,
-        "Content-Type": "image"
+        "Content-Type": contentType
     }
     if (corsEnabled) {
         headers["Access-Control-Allow-Origin"] = process.env.CORS_ORIGIN;
